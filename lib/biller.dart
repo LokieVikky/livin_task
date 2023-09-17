@@ -63,7 +63,8 @@ class Biller {
       InvoiceItem(MenuMockRepository().tea, 1),
       InvoiceItem(MenuMockRepository().soda, 1),
     ];
-    Invoice invoice = Invoice('Group 2', items);
+    Invoice invoice =
+        Invoice('Group 2', items, discount: const Discount(10, DiscountType.percentage));
     InvoiceDetails invoiceDetails = invoice.createInvoice();
     invoiceDetails.pay(invoiceDetails.total, PaymentMethod.creditCard);
     return ['${_getPrintableInvoice(invoiceDetails)}\n'];
@@ -80,7 +81,8 @@ class Biller {
       InvoiceItem(MenuMockRepository().poachedEggs, 2),
       InvoiceItem(MenuMockRepository().gardenSalad, 3),
     ];
-    Invoice invoice = Invoice('Group 3', items, splitBy: 3);
+    Invoice invoice =
+        Invoice('Group 3', items, splitBy: 7, discount: const Discount(25, DiscountType.amount));
     List<InvoiceDetails> splitInvoices = invoice.createSplitInvoices();
     for (InvoiceDetails id in splitInvoices) {
       id.pay(id.total, PaymentMethod.cash);

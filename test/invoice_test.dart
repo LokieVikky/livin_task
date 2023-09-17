@@ -51,8 +51,7 @@ void main() {
       InvoiceItem(MenuMockRepository().soda, 1),
     ];
 
-    Invoice invoice = Invoice('Group 2', items,
-        splitBy: 3, discount: const Discount(10, DiscountType.percentage));
+    Invoice invoice = Invoice('Group 2', items, discount: const Discount(10, DiscountType.percentage));
 
     /// Creating master invoice
     InvoiceDetails masterInvoice = invoice.createInvoice();
@@ -89,7 +88,7 @@ void main() {
     ];
 
     Invoice invoice = Invoice('Group 3', items,
-        splitBy: 3, discount: const Discount(25, DiscountType.amount));
+        splitBy: 7, discount: const Discount(25, DiscountType.amount));
 
     /// Creating master invoice
     InvoiceDetails masterInvoice = invoice.createInvoice();
