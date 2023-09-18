@@ -92,13 +92,12 @@ class Invoice {
   final Discount discount;
 
   const Invoice(this.groupName, this.items,
-      {this.splitBy = 1,
-      this.discount = const Discount(0, DiscountType.amount)});
+      {this.splitBy = 1, this.discount = const Discount(0, DiscountType.amount)});
 
   /// Used to create the master invoice
   InvoiceDetails createInvoice() {
-    InvoiceDetails details = _getInvoiceDetails(
-        InvoiceMockRepository().getNextInvoiceNumber(), items);
+    InvoiceDetails details =
+        _getInvoiceDetails(InvoiceMockRepository().getNextInvoiceNumber(), items);
     InvoiceMockRepository().saveInvoice(details);
     return details;
   }
@@ -118,8 +117,7 @@ class Invoice {
     return invoices;
   }
 
-  InvoiceDetails _getInvoiceDetails(int invoiceNumber, List<InvoiceItem> items,
-      {int splitBy = 1}) {
+  InvoiceDetails _getInvoiceDetails(int invoiceNumber, List<InvoiceItem> items, {int splitBy = 1}) {
     if (splitBy < 1) {
       throw InvoiceException(message: 'Split value cannot be less than 1');
     }
@@ -127,47 +125,40 @@ class Invoice {
     itemWithoutTaxes = itemWithoutTaxes
         .map((e) => e.copyWith(
             quantity: e.quantity / splitBy,
-            menuItem: e.menuItem.copyWith(
-                name: e.menuItem.name,
-                price: _reduceIncludingTax(e.menuItem.price))))
+            menuItem: e.menuItem
+                .copyWith(name: e.menuItem.name, price: _reduceIncludingTax(e.menuItem.price))))
         .toList();
 
     double subTotal = _sumItemTotals(itemWithoutTaxes);
 
     double discountAmount = discount.value > 0
         ? discount.discountType == DiscountType.amount
-            ? discount.value
+            ? discount.value / splitBy
             : _calculateDiscountAmount(subTotal, discount.value)
         : 0.0;
 
     subTotal = subTotal - discountAmount;
     double gst = (subTotal * Configurations.gstPercentage) / 100;
-    double sgrt = Configurations.isSgrtApplicable
-        ? (subTotal * Configurations.sgrtPercentage) / 100
-        : 0.0;
+    double sgrt =
+        Configurations.isSgrtApplicable ? (subTotal * Configurations.sgrtPercentage) / 100 : 0.0;
 
     List<TaxDetails> taxDetails = [];
     taxDetails.add(TaxDetails('GST ${Configurations.gstPercentage}%', gst));
     if (Configurations.isSgrtApplicable) {
-      taxDetails
-          .add(TaxDetails('SGRT ${Configurations.sgrtPercentage}%', sgrt));
+      taxDetails.add(TaxDetails('SGRT ${Configurations.sgrtPercentage}%', sgrt));
     }
     double total = (subTotal + gst + sgrt);
-    return InvoiceDetails(invoiceNumber, groupName, splitBy, itemWithoutTaxes,
-        discountAmount, gst, sgrt, subTotal, taxDetails, total);
+    return InvoiceDetails(invoiceNumber, groupName, splitBy, itemWithoutTaxes, discountAmount, gst,
+        sgrt, subTotal, taxDetails, total);
   }
 
   double _sumItemTotals(List<InvoiceItem> items) {
-    return items.fold(
-        0.0,
-        (previousValue, element) =>
-            previousValue + (element.menuItem.price * element.quantity));
+    return items.fold(0.0,
+        (previousValue, element) => previousValue + (element.menuItem.price * element.quantity));
   }
 
   double _calculateDiscountAmount(double amount, double discountPercentage) {
-    if (amount <= 0.0 ||
-        discountPercentage < 0.0 ||
-        discountPercentage > 100.0) {
+    if (amount <= 0.0 || discountPercentage < 0.0 || discountPercentage > 100.0) {
       return 0.0;
     }
     return amount * (discountPercentage / 100.0);
@@ -185,14 +176,11 @@ class Transaction {
   final PaymentMethod paymentMethod;
   final double collected;
 
-  const Transaction(
-      {this.paymentMethod = PaymentMethod.cash, this.collected = 0.0});
+  const Transaction({this.paymentMethod = PaymentMethod.cash, this.collected = 0.0});
 
-  Transaction copyWith(
-      {PaymentMethod? paymentMethod, double? collected, double? returned}) {
+  Transaction copyWith({PaymentMethod? paymentMethod, double? collected, double? returned}) {
     return Transaction(
-        paymentMethod: paymentMethod ?? this.paymentMethod,
-        collected: collected ?? this.collected);
+        paymentMethod: paymentMethod ?? this.paymentMethod, collected: collected ?? this.collected);
   }
 }
 
@@ -214,23 +202,13 @@ class InvoiceDetails {
 
   double get paid => transaction.collected;
 
-  InvoiceDetails(
-      this.invoiceNumber,
-      this.groupName,
-      this.splitBy,
-      this.items,
-      this.discount,
-      this.gst,
-      this.sgrt,
-      this.subTotal,
-      this.taxDetails,
-      this.total,
+  InvoiceDetails(this.invoiceNumber, this.groupName, this.splitBy, this.items, this.discount,
+      this.gst, this.sgrt, this.subTotal, this.taxDetails, this.total,
       {this.transaction = const Transaction()});
 
   /// Used to pay the invoice
   void pay(double collectedAmount, PaymentMethod paymentMethod) {
-    transaction = transaction.copyWith(
-        paymentMethod: paymentMethod, collected: collectedAmount);
+    transaction = transaction.copyWith(paymentMethod: paymentMethod, collected: collectedAmount);
   }
 
   @override

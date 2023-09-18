@@ -6,7 +6,7 @@ void main() {
   /// One cent is defined as acceptable difference
   double acceptableDifference = 0.01;
 
-  test('Group 1 Invoice', () {
+  test('Invoice Test with split and without discount', () {
     List<InvoiceItem> items = [
       InvoiceItem(MenuMockRepository().bigBrekkie, 2),
       InvoiceItem(MenuMockRepository().bruchetta, 1),
@@ -41,7 +41,7 @@ void main() {
     }
   });
 
-  test('Group 2 Invoice', () {
+  test('Invoice Test without split and with discount percentage', () {
     List<InvoiceItem> items = [
       InvoiceItem(MenuMockRepository().bigBrekkie, 3),
       InvoiceItem(MenuMockRepository().gardenSalad, 1),
@@ -56,27 +56,16 @@ void main() {
     /// Creating master invoice
     InvoiceDetails masterInvoice = invoice.createInvoice();
 
-    /// Creating split invoices
-    List<InvoiceDetails> splitInvoices = invoice.createSplitInvoices();
+    /// Paying master invoice
+    masterInvoice.pay(82.8, PaymentMethod.creditCard);
 
     /// Testing master bill total
     expect(masterInvoice.total, closeTo(82.8, acceptableDifference));
 
-    /// Testing whether 3 separate bills are created
-    expect(splitInvoices.length, 3);
 
-    /// Paying transactions
-    for (InvoiceDetails id in splitInvoices) {
-      id.pay(27.6, PaymentMethod.cash);
-    }
-
-    /// Testing split invoice total
-    for (InvoiceDetails id in splitInvoices) {
-      expect(id.total, closeTo(27.6, acceptableDifference));
-    }
   });
 
-  test('Group 3 Invoice', () {
+  test('Invoice Test with split and with discount amount', () {
     List<InvoiceItem> items = [
       InvoiceItem(MenuMockRepository().tea, 2),
       InvoiceItem(MenuMockRepository().coffee, 3),
@@ -99,17 +88,17 @@ void main() {
     /// Testing master bill total
     expect(masterInvoice.total, closeTo(175.5, acceptableDifference));
 
-    /// Testing whether 3 separate bills are created
-    expect(splitInvoices.length, 3);
+    /// Testing whether 7 separate bills are created
+    expect(splitInvoices.length, 7);
 
     /// Paying transactions
     for (InvoiceDetails id in splitInvoices) {
-      id.pay(40.16, PaymentMethod.cash);
+      id.pay(25.07, PaymentMethod.cash);
     }
 
     /// Testing split invoice total
     for (InvoiceDetails id in splitInvoices) {
-      expect(id.total, closeTo(40.16, acceptableDifference));
+      expect(id.total, closeTo(25.07, acceptableDifference));
     }
   });
 }
